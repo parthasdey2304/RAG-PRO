@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+backend/.venv/
+backend/rag_studio.db*
+backend/lancedb_data/
+backend/data/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.oxlint_cache/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

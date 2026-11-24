@@ -43,8 +43,24 @@ export const Header: React.FC<HeaderProps> = ({
   toggleTheme,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const isOllamaOnline = health?.ollama?.status === 'connected';
   const targetModel = health?.ollama?.target_gen_model ?? 'offline';
+
+  const closeMenu = (callback?: () => void) => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsMobileMenuOpen(false);
+      setIsClosing(false);
+      if (callback) callback();
+    }, 220);
+  };
+
+  const openMenu = () => {
+    setIsClosing(false);
+    setIsMobileMenuOpen(true);
+  };
 
   const navItems = [
     {
@@ -93,23 +109,25 @@ export const Header: React.FC<HeaderProps> = ({
   // Handle escape key to close mobile drawer
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isMobileMenuOpen) {
-        setIsMobileMenuOpen(false);
+      if (e.key === 'Escape' && isMobileMenuOpen && !isClosing) {
+        closeMenu();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isMobileMenuOpen]);
+  }, [isMobileMenuOpen, isClosing]);
 
   const handleNavClick = (tab: 'arena' | 'docs' | 'eval' | 'traces' | 'settings') => {
     setActiveTab(tab);
-    setIsMobileMenuOpen(false);
+    closeMenu();
   };
 
   // Top-down full-screen drawer content rendered via createPortal directly on body
   const mobileDrawerContent = isMobileMenuOpen ? (
     <div
-      className="fixed inset-0 z-50 md:hidden flex flex-col bg-slate-50 dark:bg-[#090d16] select-none animate-in fade-in slide-in-from-top-4 duration-200"
+      className={`fixed inset-0 z-50 md:hidden flex flex-col bg-slate-50 dark:bg-[#090d16] select-none ${
+        isClosing ? 'animate-slide-up' : 'animate-slide-down'
+      }`}
       role="dialog"
       aria-modal="true"
       aria-label="Mobile Navigation Menu"
@@ -146,7 +164,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Close Button */}
           <button
-            onClick={() => setIsMobileMenuOpen(false)}
+            onClick={() => closeMenu()}
             className="p-2 rounded border-2 border-slate-900 dark:border-slate-700 bg-[#facc15] text-slate-950 hover:bg-yellow-300 transition-colors cursor-pointer shadow-xs font-bold"
             aria-label="Close navigation menu"
           >
@@ -214,8 +232,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="grid grid-cols-2 gap-2.5 pt-1">
             <button
               onClick={() => {
-                setIsMobileMenuOpen(false);
-                onOpenIngestModal();
+                closeMenu(() => onOpenIngestModal());
               }}
               className="p-3 rounded-lg bg-[#facc15] text-slate-950 border-2 border-slate-900 border-b-4 border-r-4 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs active:translate-x-0.5 active:translate-y-0.5"
             >
@@ -225,8 +242,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={() => {
-                setIsMobileMenuOpen(false);
-                onOpenNotifications();
+                closeMenu(() => onOpenNotifications());
               }}
               className="p-3 rounded-lg bg-white dark:bg-[#0f172a] border-2 border-slate-900 dark:border-slate-700 border-b-4 border-r-4 text-slate-950 dark:text-slate-100 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs active:translate-x-0.5 active:translate-y-0.5 relative"
             >
@@ -405,7 +421,7 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Neo-Brutalist Mobile Hamburger Menu Button (Visible on < md) */}
             <button
-              onClick={() => setIsMobileMenuOpen(true)}
+              onClick={openMenu}
               className="md:hidden p-1.5 sm:p-2 rounded border-2 border-slate-900 dark:border-slate-700 bg-[#facc15] text-slate-950 hover:bg-yellow-300 transition-colors cursor-pointer shadow-xs font-bold"
               aria-label="Open full-screen navigation menu"
               title="Open navigation menu"

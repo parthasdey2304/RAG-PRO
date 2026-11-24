@@ -7,16 +7,18 @@ import {
   Download,
   Flame,
   Terminal,
-  PlayCircle
+  PlayCircle,
+  HelpCircle
 } from 'lucide-react';
 import type { TraceRecord } from '../types';
 
 interface TelemetryTracesProps {
   traces?: TraceRecord[];
   onTriggerToast?: (msg: string, type?: 'default' | 'success' | 'warning' | 'error') => void;
+  onStartTour?: () => void;
 }
 
-export const TelemetryTraces: React.FC<TelemetryTracesProps> = ({ traces: propTraces = [], onTriggerToast }) => {
+export const TelemetryTraces: React.FC<TelemetryTracesProps> = ({ traces: propTraces = [], onTriggerToast, onStartTour }) => {
   const [searchFilter, setSearchFilter] = useState('');
   const [engineFilter, setEngineFilter] = useState<'ALL' | 'VECTOR' | 'TREE' | 'DUAL'>('ALL');
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -66,7 +68,7 @@ export const TelemetryTraces: React.FC<TelemetryTracesProps> = ({ traces: propTr
   if (traces.length === 0) {
     return (
       <div className="p-4 sm:p-8 max-w-4xl mx-auto font-mono text-center space-y-4">
-        <div className="studio-card p-12 space-y-4">
+        <div className="studio-card p-12 space-y-4" data-tour="traces-flamegraph">
           <div className="w-14 h-14 mx-auto rounded-xl bg-yellow-400 border-2 border-slate-900 flex items-center justify-center text-slate-950 font-black shadow-xs">
             <Activity className="w-7 h-7" />
           </div>
@@ -78,11 +80,20 @@ export const TelemetryTraces: React.FC<TelemetryTracesProps> = ({ traces: propTr
               Real-time OpenTelemetry retrieval spans, waterfall latencies, and AST traversals will be recorded here dynamically as you execute queries.
             </p>
           </div>
-          <div className="pt-2">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200">
               <PlayCircle className="w-4 h-4 text-yellow-500" />
               <span>Switch to "Retrieval Arena" tab to execute queries</span>
             </span>
+            {onStartTour && (
+              <button
+                onClick={onStartTour}
+                className="studio-btn-primary text-xs inline-flex items-center gap-1.5"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span>Take Quick Tour</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -171,7 +182,7 @@ export const TelemetryTraces: React.FC<TelemetryTracesProps> = ({ traces: propTr
       </div>
 
       {/* Split Trace Explorer Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5" data-tour="traces-flamegraph">
         {/* Left Column (40% width): Historical Trace List */}
         <div className="lg:col-span-5 studio-card flex flex-col overflow-hidden">
           <div className="bg-slate-100 dark:bg-[#0b1120] border-b-2 border-slate-900 dark:border-slate-800 p-3 sm:p-3.5 flex items-center justify-between">

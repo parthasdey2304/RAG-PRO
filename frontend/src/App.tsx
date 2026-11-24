@@ -8,8 +8,9 @@ import { SettingsWorkbench } from './components/SettingsWorkbench';
 import { IngestModal } from './components/IngestModal';
 import { NotificationDrawer } from './components/NotificationDrawer';
 import { ToastStack } from './components/ToastStack';
+import { GuidedTour } from './components/GuidedTour';
 import type { DocumentItem, HealthStatus, StudioNotification, StudioToast, TraceRecord } from './types';
-import { BarChart3, FileText, Upload } from 'lucide-react';
+import { BarChart3, FileText, Upload, HelpCircle } from 'lucide-react';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'arena' | 'docs' | 'eval' | 'traces' | 'settings'>('arena');
@@ -17,6 +18,7 @@ export function App() {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
 
   // Theme state: initialized from HTML class (set by no-FOUC script) or localStorage
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -175,13 +177,17 @@ export function App() {
         onOpenIngestModal={() => setIsIngestModalOpen(true)}
         theme={theme}
         toggleTheme={toggleTheme}
+        onStartTour={() => setIsTourOpen(true)}
       />
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-[1720px] w-full mx-auto">
         {/* Onboarding Callout if no documents exist */}
         {documents.length === 0 && (
-          <div className="m-3 sm:m-6 p-4 rounded-xl bg-white dark:bg-[#0f172a] border-2 border-slate-900 dark:border-slate-700 border-b-4 border-r-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+          <div
+            data-tour="doc-ingest-controls"
+            className="m-3 sm:m-6 p-4 rounded-xl bg-white dark:bg-[#0f172a] border-2 border-slate-900 dark:border-slate-700 border-b-4 border-r-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs"
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-yellow-400 text-slate-950 border border-slate-900">
                 <BarChart3 className="w-5 h-5 shrink-0" />
@@ -195,7 +201,15 @@ export function App() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+              <button
+                onClick={() => setIsTourOpen(true)}
+                className="studio-btn-ghost flex-1 sm:flex-initial justify-center bg-yellow-400/20 text-slate-950 dark:text-yellow-400 border-yellow-500 font-bold"
+                title="Start Guided Interactive Walkthrough"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span>Quick Tour</span>
+              </button>
               <button
                 onClick={() => setIsIngestModalOpen(true)}
                 className="studio-btn-ghost flex-1 sm:flex-initial justify-center"
@@ -224,6 +238,7 @@ export function App() {
             onAddTrace={addTrace}
             onAddNotification={addNotification}
             onTriggerToast={addToast}
+            onStartTour={() => setIsTourOpen(true)}
           />
         )}
 
@@ -234,6 +249,7 @@ export function App() {
             onSelectDoc={setSelectedDocId}
             onUploadSuccess={fetchDocuments}
             onTriggerToast={addToast}
+            onStartTour={() => setIsTourOpen(true)}
           />
         )}
 
@@ -242,6 +258,7 @@ export function App() {
             documents={documents}
             selectedDocId={selectedDocId}
             onTriggerToast={addToast}
+            onStartTour={() => setIsTourOpen(true)}
           />
         )}
 
@@ -249,6 +266,7 @@ export function App() {
           <TelemetryTraces
             traces={traces}
             onTriggerToast={addToast}
+            onStartTour={() => setIsTourOpen(true)}
           />
         )}
 
@@ -299,6 +317,14 @@ export function App() {
       <ToastStack
         toasts={toasts}
         onDismiss={removeToast}
+      />
+
+      {/* Interactive Guided Tour & Spotlight Engine */}
+      <GuidedTour
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
     </div>
   );

@@ -7,7 +7,8 @@ import {
   Clock,
   Copy,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  HelpCircle
 } from 'lucide-react';
 import type { DocumentItem, StudioNotification, TraceRecord, VectorQueryResponse, VectorlessQueryResponse } from '../types';
 
@@ -18,6 +19,7 @@ interface SplitScreenArenaProps {
   onAddTrace?: (trace: TraceRecord) => void;
   onTriggerToast?: (msg: string, type?: 'default' | 'success' | 'warning' | 'error') => void;
   onAddNotification?: (notif: StudioNotification) => void;
+  onStartTour?: () => void;
 }
 
 export const SplitScreenArena: React.FC<SplitScreenArenaProps> = ({
@@ -27,6 +29,7 @@ export const SplitScreenArena: React.FC<SplitScreenArenaProps> = ({
   onAddTrace,
   onTriggerToast,
   onAddNotification,
+  onStartTour,
 }) => {
   const [query, setQuery] = useState(
     'What are the core differences in retrieval determinism between vector search and vectorless tree reasoning?'
@@ -250,7 +253,7 @@ export const SplitScreenArena: React.FC<SplitScreenArenaProps> = ({
   return (
     <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
       {/* Top Query & Benchmarking Control Bar */}
-      <div className="studio-card p-3.5 sm:p-5">
+      <div className="studio-card p-3.5 sm:p-5" data-tour="arena-query-bar">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
             <span className="text-[10px] sm:text-[11px] font-mono px-2 py-0.5 rounded bg-yellow-400 text-slate-950 border border-slate-900 font-bold tracking-wide uppercase shrink-0 shadow-2xs">
@@ -259,6 +262,16 @@ export const SplitScreenArena: React.FC<SplitScreenArenaProps> = ({
             <h2 className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-slate-100 truncate">
               Simultaneous Dual-Engine Execution & Reranking
             </h2>
+            {onStartTour && (
+              <button
+                onClick={onStartTour}
+                className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-yellow-400 px-1.5 py-0.5 rounded border border-dashed border-slate-300 dark:border-slate-700 hover:border-yellow-400 cursor-pointer transition-colors"
+                title="Start Guided Interactive Walkthrough"
+              >
+                <HelpCircle className="w-3 h-3" />
+                <span>Tour</span>
+              </button>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
@@ -349,7 +362,7 @@ export const SplitScreenArena: React.FC<SplitScreenArenaProps> = ({
       {/* Dual Split-Screen Side-by-Side Comparison Panels */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
         {/* Left Panel: Vector Search + FlashRank Reranker */}
-        <div className="studio-card flex flex-col overflow-hidden">
+        <div className="studio-card flex flex-col overflow-hidden" data-tour="arena-vector-pane">
           {/* Panel Header */}
           <div className="bg-slate-100 dark:bg-[#0b1120] border-b border-slate-200 dark:border-slate-800 p-3 sm:p-3.5 flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
@@ -498,7 +511,7 @@ export const SplitScreenArena: React.FC<SplitScreenArenaProps> = ({
         </div>
 
         {/* Right Panel: Vectorless Hierarchical Tree-Reasoning */}
-        <div className="studio-card flex flex-col overflow-hidden">
+        <div className="studio-card flex flex-col overflow-hidden" data-tour="arena-vectorless-pane">
           {/* Panel Header */}
           <div className="bg-slate-100 dark:bg-[#0b1120] border-b border-slate-200 dark:border-slate-800 p-3 sm:p-3.5 flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
@@ -610,7 +623,7 @@ export const SplitScreenArena: React.FC<SplitScreenArenaProps> = ({
       </div>
 
       {/* Bottom Telemetry & Comparison Ribbon */}
-      <div className="studio-card p-3 sm:p-4 bg-slate-100/60 dark:bg-[#0b1120]">
+      <div className="studio-card p-3 sm:p-4 bg-slate-100/60 dark:bg-[#0b1120]" data-tour="arena-metrics-summary">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 text-xs font-mono">
           <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
             <span className="text-slate-500 dark:text-slate-400 text-[10px] block mb-0.5">PRECISION DELTA</span>

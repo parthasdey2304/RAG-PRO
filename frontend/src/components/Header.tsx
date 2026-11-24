@@ -15,7 +15,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  Cpu
+  Cpu,
+  HelpCircle
 } from 'lucide-react';
 import type { HealthStatus } from '../types';
 
@@ -29,6 +30,7 @@ interface HeaderProps {
   onOpenIngestModal: () => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
+  onStartTour?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -41,6 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenIngestModal,
   theme,
   toggleTheme,
+  onStartTour,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -148,7 +151,22 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Guided Tour Trigger inside Drawer */}
+          {onStartTour && (
+            <button
+              onClick={() => {
+                closeMenu(() => onStartTour());
+              }}
+              className="px-2.5 py-1.5 rounded border-2 border-slate-900 dark:border-slate-700 bg-[#facc15] text-slate-950 hover:bg-yellow-300 font-black text-xs flex items-center gap-1.5 shadow-xs border-b-4 border-r-4 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+              title="Start Guided Interactive Walkthrough"
+              aria-label="Start Guided Tour"
+            >
+              <HelpCircle className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>TOUR</span>
+            </button>
+          )}
+
           {/* Theme Toggle inside Drawer */}
           <button
             onClick={toggleTheme}
@@ -351,7 +369,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Right: Real Model Indicator, Theme Toggle, Notification Bell, and Mobile Hamburger */}
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-mono shrink-0">
             {/* Real Dynamic Model Status (No fabricated badges) */}
-            <div className="hidden lg:flex items-center gap-1.5">
+            <div className="hidden lg:flex items-center gap-1.5" data-tour="header-telemetry">
               <div
                 className={`flex items-center gap-1.5 px-2 py-1 rounded border-2 border-slate-900 text-[10px] font-bold ${
                   isOllamaOnline
@@ -404,6 +422,21 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               )}
             </button>
+
+            {/* Guided Tour Button (Desktop & Tablet) */}
+            {onStartTour && (
+              <button
+                onClick={onStartTour}
+                className="p-1.5 sm:px-2.5 sm:py-1.5 rounded border-2 border-slate-900 dark:border-slate-700 bg-[#facc15] text-slate-950 hover:bg-yellow-300 font-black text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-xs border-b-4 border-r-4 active:translate-x-0.5 active:translate-y-0.5"
+                title="Start Guided Interactive Walkthrough"
+                aria-label="Start Guided Tour"
+                data-tour="tour-trigger"
+              >
+                <HelpCircle className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span className="hidden lg:inline tracking-wider">HOW IT WORKS</span>
+                <span className="lg:hidden tracking-wider">TOUR</span>
+              </button>
+            )}
 
             {/* Neo-Brutalist Sun/Moon Theme Toggle (Desktop & Mobile) */}
             <button

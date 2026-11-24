@@ -5,7 +5,8 @@ import {
   FileCode,
   RefreshCw,
   Download,
-  BarChart3
+  BarChart3,
+  HelpCircle
 } from 'lucide-react';
 import type { DocumentItem, EvalRunRecord, GoldenQuestion, ModeMetrics } from '../types';
 
@@ -13,11 +14,13 @@ interface EvalLabProps {
   documents: DocumentItem[];
   selectedDocId: string | null;
   onTriggerToast?: (msg: string, type?: 'default' | 'success' | 'warning' | 'error') => void;
+  onStartTour?: () => void;
 }
 
 export const EvalLab: React.FC<EvalLabProps> = ({
   selectedDocId,
   onTriggerToast,
+  onStartTour,
 }) => {
   const [goldenDatasetJson, setGoldenDatasetJson] = useState<string>('');
   const [datasetError, setDatasetError] = useState<string | null>(null);
@@ -280,7 +283,7 @@ export const EvalLab: React.FC<EvalLabProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-            <div className="flex rounded border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 p-0.5 shadow-xs">
+            <div className="flex rounded border-2 border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 p-0.5 shadow-xs" data-tour="eval-golden-editor">
               <button
                 onClick={() => setActiveTab('matrix')}
                 className={`px-3 py-1 rounded text-xs transition-colors font-bold ${
@@ -303,6 +306,7 @@ export const EvalLab: React.FC<EvalLabProps> = ({
               </button>
               <button
                 onClick={() => setActiveTab('history')}
+                data-tour="eval-cost-history"
                 className={`px-3 py-1 rounded text-xs transition-colors font-bold ${
                   activeTab === 'history'
                     ? 'bg-[#facc15] text-slate-950 border border-slate-900 shadow-2xs'
@@ -326,6 +330,7 @@ export const EvalLab: React.FC<EvalLabProps> = ({
             <button
               onClick={handleStartBenchmark}
               disabled={isRunning}
+              data-tour="eval-run-btn"
               className="studio-btn-primary disabled:opacity-50 text-xs"
               title="Execute full benchmark suite (Cmd+R / Ctrl+R)"
             >
@@ -445,7 +450,7 @@ export const EvalLab: React.FC<EvalLabProps> = ({
           </div>
 
           {/* Full Head-to-Head Comparison Table Across ALL ModeMetrics */}
-          <div className="studio-card overflow-hidden font-mono text-xs">
+          <div className="studio-card overflow-hidden font-mono text-xs" data-tour="eval-metrics-matrix">
             <div className="bg-slate-100 dark:bg-[#0b1120] border-b-2 border-slate-900 dark:border-slate-800 p-3.5 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-slate-950 dark:text-yellow-400" />
@@ -469,6 +474,17 @@ export const EvalLab: React.FC<EvalLabProps> = ({
                 <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto">
                   Click the <strong>RUN BENCHMARK (⌘R)</strong> button to execute the evaluation across Vector Raw, Vector + FlashRank, and Tree Reasoning.
                 </p>
+                {onStartTour && (
+                  <div className="pt-2">
+                    <button
+                      onClick={onStartTour}
+                      className="studio-btn-primary text-xs inline-flex items-center gap-1.5"
+                    >
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>Take Interactive Tour</span>
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto">

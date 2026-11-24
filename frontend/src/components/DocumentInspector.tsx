@@ -10,7 +10,8 @@ import {
   CheckCircle2,
   Search,
   Sliders,
-  FolderTree
+  FolderTree,
+  HelpCircle
 } from 'lucide-react';
 import type { DocumentItem, TreeNode } from '../types';
 
@@ -20,6 +21,7 @@ interface DocumentInspectorProps {
   onSelectDoc: (id: string) => void;
   onUploadSuccess: () => void;
   onTriggerToast?: (msg: string, type?: 'default' | 'success' | 'warning' | 'error') => void;
+  onStartTour?: () => void;
 }
 
 export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
@@ -28,6 +30,7 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
   onSelectDoc,
   onUploadSuccess,
   onTriggerToast,
+  onStartTour,
 }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -318,7 +321,7 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
       </div>
 
       {/* Column 2: Interactive Hierarchical Tree Visualizer (5 cols) */}
-      <div className="lg:col-span-8 xl:col-span-5 studio-card flex flex-col overflow-hidden">
+      <div className="lg:col-span-8 xl:col-span-5 studio-card flex flex-col overflow-hidden" data-tour="docs-tree-viewer">
         {/* Panel Header */}
         <div className="bg-slate-100 dark:bg-[#0b1120] border-b border-slate-200 dark:border-slate-800 p-3 sm:p-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
@@ -371,6 +374,15 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
               <FolderTree className="w-8 h-8 mx-auto text-slate-400 dark:text-slate-600 mb-2" />
               <p className="font-bold text-slate-900 dark:text-white">No document selected</p>
               <p>Select a document from the left panel or load the blueprint to initialize an AST tree.</p>
+              {onStartTour && (
+                <button
+                  onClick={onStartTour}
+                  className="studio-btn-ghost mt-3 text-xs inline-flex items-center gap-1.5"
+                >
+                  <HelpCircle className="w-3.5 h-3.5" />
+                  <span>Take Interactive Tour</span>
+                </button>
+              )}
             </div>
           ) : !selectedDoc.tree || selectedDoc.tree.length === 0 ? (
             <div className="p-10 text-center space-y-2 font-mono text-xs text-slate-500">

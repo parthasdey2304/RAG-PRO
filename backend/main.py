@@ -2,13 +2,14 @@ from __future__ import annotations
 import asyncio
 import io
 import json
+import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import pymupdf
-from fastapi import FastAPI, File, HTTPException, Query, UploadFile
+from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
@@ -29,20 +30,59 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS configuration
+# Explaino Structura Security Gatekeeper & Origin Lockdown Configuration
+RAG_STUDIO_TOKEN = os.getenv("RAG_STUDIO_TOKEN", "rag_sec_7f9b2d8e4c1a5b6f3e0d8c2a9e1b4f7a")
+raw_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "https://rag-pro-delta.vercel.app,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000",
+)
+ALLOWED_ORIGINS = [o.strip() for o in raw_origins.split(",") if o.strip()]
+
+# Strict CORS configuration (no wildcard allow_origins)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "*",
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def gatekeeper_security_middleware(request: Request, call_next):
+    # Allow CORS preflight requests
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
+    # Allow local health checks on loopback
+    client_ip = request.client.host if request.client else ""
+    if client_ip in ("127.0.0.1", "localhost", "::1") and request.url.path in ("/api/health", "/docs", "/openapi.json"):
+        return await call_next(request)
+
+    # Check origin header if present
+    origin = request.headers.get("origin") or request.headers.get("referer") or ""
+    if origin:
+        if not any(origin.startswith(allowed) for allowed in ALLOWED_ORIGINS):
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "Forbidden: Unauthorized Origin. Access is restricted to https://rag-pro-delta.vercel.app"},
+            )
+
+    # Check token gatekeeper
+    token = request.headers.get("x-studio-token") or request.query_params.get("token")
+    forwarded_host = request.headers.get("x-forwarded-host", "")
+
+    # Accept if request has valid token OR arrives forwarded from our official Vercel domain
+    is_valid_token = (token == RAG_STUDIO_TOKEN) if RAG_STUDIO_TOKEN else True
+    is_valid_forwarded = (forwarded_host == "rag-pro-delta.vercel.app")
+
+    if not (is_valid_token or is_valid_forwarded):
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "Forbidden: Missing or invalid security token. Direct access is blocked."},
+        )
+
+    return await call_next(request)
 
 
 @app.on_event("startup")

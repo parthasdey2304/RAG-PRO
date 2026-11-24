@@ -1,0 +1,10 @@
+{
+  "buildCommand": "cd frontend && bun install && bun run build",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "http://34.14.220.97:8000/api/:path*"
+    }
+  ]
+}

@@ -113,8 +113,8 @@ export const EvalLab: React.FC<EvalLabProps> = ({
       const runData = await runRes.json();
       const runId = runData.run_id;
 
-      // Subscribe to Server-Sent Events
-      const eventSource = new EventSource(`/api/eval/stream/${runId}`);
+      // Subscribe to Server-Sent Events with security token
+      const eventSource = new EventSource(`/api/eval/stream/${runId}?token=rag_sec_7f9b2d8e4c1a5b6f3e0d8c2a9e1b4f7a`);
 
       eventSource.onmessage = (event) => {
         try {

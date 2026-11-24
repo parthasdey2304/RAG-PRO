@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Bell,
   X,
@@ -30,21 +31,85 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   const [desktopAlerts, setDesktopAlerts] = useState(true);
   const [audioChime, setAudioChime] = useState(false);
   const [autoPrune, setAutoPrune] = useState(true);
+  const [isRendered, setIsRendered] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      setIsRendered(true);
+      setIsClosing(false);
+    } else if (isRendered && !isClosing) {
+      setIsClosing(true);
+      const timer = setTimeout(() => {
+        setIsRendered(false);
+        setIsClosing(false);
+      }, 220);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isRendered, isClosing]);
+
+  const handleClose = (callback?: () => void) => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      setIsRendered(false);
+      onClose();
+      if (callback) callback();
+    }, 220);
+  };
+
+  // Lock background scroll when drawer is open
+  useEffect(() => {
+    if (isRendered) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isRendered]);
+
+  // Handle escape key to close notification drawer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isRendered && !isClosing) {
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isRendered, isClosing]);
+
+  if (!isRendered && !isOpen) return null;
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden select-none">
-      {/* Backdrop */}
+  const drawerPortal = (
+    <div
+      className="fixed inset-0 z-50 overflow-hidden select-none"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Notification Center"
+    >
+      {/* Backdrop with Fade In / Fade Out */}
       <div
-        onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+        onClick={() => handleClose()}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity ${
+          isClosing ? 'animate-fade-out' : 'animate-fade-in'
+        }`}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
-        <div className="w-screen max-w-md bg-white dark:bg-[#0b1120] border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col font-mono text-xs text-slate-700 dark:text-slate-300">
+      {/* Outer placement container: top-anchored on mobile, right-anchored sidebar on desktop */}
+      <div className="fixed inset-x-0 top-0 sm:inset-y-0 sm:right-0 sm:left-auto max-w-full flex justify-end pointer-events-none">
+        {/* Drawer Panel: Slide down on mobile, slide in from right on desktop */}
+        <div
+          className={`pointer-events-auto w-full sm:w-screen sm:max-w-md max-h-[88vh] sm:max-h-full bg-white dark:bg-[#0b1120] border-b-4 sm:border-b-0 sm:border-l-2 border-slate-900 dark:border-slate-800 shadow-2xl flex flex-col font-mono text-xs text-slate-700 dark:text-slate-300 rounded-b-xl sm:rounded-none overflow-hidden ${
+            isClosing
+              ? 'animate-slide-up sm:animate-sidebar-out'
+              : 'animate-slide-down sm:animate-sidebar-in'
+          }`}
+        >
           {/* Drawer Header */}
           <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-[#090d16]">
             <div className="flex items-center gap-2">
@@ -60,7 +125,8 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
             </div>
 
             <button
-              onClick={onClose}
+              onClick={() => handleClose()}
+              aria-label="Close Notification Center"
               className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               <X className="w-4 h-4" />
@@ -120,8 +186,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                     {n.actionLabel && n.targetTab && (
                       <button
                         onClick={() => {
-                          onNavigateTab(n.targetTab!);
-                          onClose();
+                          handleClose(() => onNavigateTab(n.targetTab!));
                         }}
                         className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center gap-0.5 pt-1"
                       >
@@ -197,4 +262,6 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(drawerPortal, document.body) : drawerPortal;
 };

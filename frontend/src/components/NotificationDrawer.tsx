@@ -43,17 +43,17 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
         className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-[#0b1120] border-l border-slate-800 shadow-2xl flex flex-col font-mono text-xs text-slate-300">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
+        <div className="w-screen max-w-md bg-white dark:bg-[#0b1120] border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col font-mono text-xs text-slate-700 dark:text-slate-300">
           {/* Drawer Header */}
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-[#090d16]">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-[#090d16]">
             <div className="flex items-center gap-2">
-              <Bell className="w-4 h-4 text-blue-400" />
-              <h3 className="font-semibold text-white text-sm">
+              <Bell className="w-4 h-4 text-yellow-500" />
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm">
                 Notification Center
               </h3>
               {unreadCount > 0 && (
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-blue-600 text-white font-bold">
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-yellow-400 text-slate-950 font-bold border border-slate-900">
                   {unreadCount} Unread
                 </span>
               )}
@@ -61,23 +61,23 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
 
             <button
               onClick={onClose}
-              className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Subheader Controls */}
-          <div className="px-4 py-2 bg-slate-900/60 border-b border-slate-800/80 flex items-center justify-between text-[11px]">
+          <div className="px-4 py-2 bg-slate-100/60 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
             <button
               onClick={onMarkAllAsRead}
-              className="text-slate-400 hover:text-blue-400 transition-colors"
+              className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               Mark all as read
             </button>
             <button
               onClick={onClearAll}
-              className="text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1"
+              className="text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors flex items-center gap-1"
             >
               <Trash2 className="w-3 h-3" />
               <span>Clear All</span>
@@ -97,23 +97,23 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                     key={n.id}
                     className={`studio-card-elevated p-3 border-l-2 text-xs space-y-1.5 transition-colors ${
                       isSuccess
-                        ? 'border-l-emerald-400'
+                        ? 'border-l-emerald-500'
                         : isWarning
-                        ? 'border-l-amber-400'
-                        : 'border-l-blue-400'
-                    } ${!n.read ? 'bg-slate-900/90' : 'opacity-85'}`}
+                        ? 'border-l-amber-500'
+                        : 'border-l-blue-500'
+                    } ${!n.read ? 'bg-blue-50/40 dark:bg-slate-900/90' : 'opacity-85'}`}
                   >
                     <div className="flex items-center justify-between text-[10px]">
                       <div className="flex items-center gap-1.5">
-                        {isSuccess && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
-                        {isWarning && <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />}
-                        {isInfo && <Info className="w-3.5 h-3.5 text-blue-400" />}
-                        <span className="font-semibold text-slate-200">{n.title}</span>
+                        {isSuccess && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+                        {isWarning && <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />}
+                        {isInfo && <Info className="w-3.5 h-3.5 text-blue-500" />}
+                        <span className="font-semibold text-slate-900 dark:text-slate-200">{n.title}</span>
                       </div>
-                      <span className="text-slate-500">{n.timestamp}</span>
+                      <span className="text-slate-400 dark:text-slate-500">{n.timestamp}</span>
                     </div>
 
-                    <p className="text-slate-300 font-sans text-[11px] leading-relaxed">
+                    <p className="text-slate-700 dark:text-slate-300 font-sans text-[11px] leading-relaxed">
                       {n.message}
                     </p>
 
@@ -123,7 +123,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                           onNavigateTab(n.targetTab!);
                           onClose();
                         }}
-                        className="text-[10px] text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-0.5 pt-1"
+                        className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center gap-0.5 pt-1"
                       >
                         <span>{n.actionLabel}</span>
                         <ChevronRight className="w-3 h-3" />
@@ -140,44 +140,56 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
           </div>
 
           {/* Drawer Bottom Preferences */}
-          <div className="p-4 border-t border-slate-800 bg-[#090d16] space-y-2 text-[11px]">
+          <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#090d16] space-y-2 text-[11px]">
             <span className="text-[10px] text-slate-500 font-bold uppercase block mb-1">
               NOTIFICATION PREFERENCES
             </span>
 
-            <div className="flex items-center justify-between text-slate-300">
+            <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
               <span>Desktop system notifications</span>
               <button
                 onClick={() => setDesktopAlerts(!desktopAlerts)}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                  desktopAlerts ? 'bg-blue-900/60 text-blue-300 border border-blue-700' : 'bg-slate-800 text-slate-500'
+                className={`w-8 h-4 rounded-full transition-colors relative ${
+                  desktopAlerts ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
-                {desktopAlerts ? 'ON' : 'OFF'}
+                <span
+                  className={`block w-3 h-3 rounded-full bg-white transition-transform ${
+                    desktopAlerts ? 'translate-x-4' : 'translate-x-1'
+                  }`}
+                />
               </button>
             </div>
 
-            <div className="flex items-center justify-between text-slate-300">
-              <span>Audio chime on benchmark finish</span>
+            <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+              <span>Audio latency chime</span>
               <button
                 onClick={() => setAudioChime(!audioChime)}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                  audioChime ? 'bg-blue-900/60 text-blue-300 border border-blue-700' : 'bg-slate-800 text-slate-500'
+                className={`w-8 h-4 rounded-full transition-colors relative ${
+                  audioChime ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
-                {audioChime ? 'ON' : 'OFF'}
+                <span
+                  className={`block w-3 h-3 rounded-full bg-white transition-transform ${
+                    audioChime ? 'translate-x-4' : 'translate-x-1'
+                  }`}
+                />
               </button>
             </div>
 
-            <div className="flex items-center justify-between text-slate-300">
-              <span>Auto-prune traces older than 7 days</span>
+            <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+              <span>Auto-prune read alerts (24h)</span>
               <button
                 onClick={() => setAutoPrune(!autoPrune)}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                  autoPrune ? 'bg-blue-900/60 text-blue-300 border border-blue-700' : 'bg-slate-800 text-slate-500'
+                className={`w-8 h-4 rounded-full transition-colors relative ${
+                  autoPrune ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
-                {autoPrune ? 'ON (16MB)' : 'OFF'}
+                <span
+                  className={`block w-3 h-3 rounded-full bg-white transition-transform ${
+                    autoPrune ? 'translate-x-4' : 'translate-x-1'
+                  }`}
+                />
               </button>
             </div>
           </div>
